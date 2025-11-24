@@ -10,6 +10,11 @@ game = MatrixGame()
 def index():
     return render_template('index.html')
 
+@app.route('/levels')
+def level_select():
+    """Level selection page"""
+    return render_template('level_select.html')
+
 @app.route('/level/<int:level_id>')
 def load_level(level_id):
     """Load a specific game level"""
@@ -42,3 +47,7 @@ def get_hint():
     level = session.get('current_level', 0)
     # TODO: Generate helpful hints based on level difficulty
     return jsonify({'hint': 'Think about matrix dimensions first!'})
+
+if __name__ == '__main__':
+    # app.run() = app.start()
+    app.run(debug=True, host='0.0.0.0', port=5000)
