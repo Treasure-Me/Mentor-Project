@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Matrix Multiplier Mayhem</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="game-container">
+        <h1>Level <span id="level-number">1</span></h1>
+        
+        <div class="matrices-container">
+            <!-- Input Matrix -->
+            <div class="matrix-panel">
+                <h3>Input Stream</h3>
+                <div id="input-matrix" class="matrix">
+                    {{ level.input|tojson }}
+                </div>
+            </div>
+            
+            <!-- Transformation Slot (DRAGGABLE) -->
+            <div class="operation-panel">
+                <h3>Transformation</h3>
+                <div id="transformation-slot" class="matrix-slot" 
+                     ondrop="dropMatrix(event)" ondragover="allowDrop(event)">
+                    Drag Matrix Here
+                </div>
+                <div class="operator">×</div>
+            </div>
+            
+            <!-- Target Matrix -->
+            <div class="matrix-panel">
+                <h3>Target Output</h3>
+                <div id="target-matrix" class="matrix">
+                    {{ level.target|tojson }}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Matrix Palette -->
+        <div class="palette">
+            <h3>Available Matrices</h3>
+            <div id="matrix-palette">
+                <!-- THEY COMPLETE: Generate draggable matrix options -->
+            </div>
+        </div>
+        
+        <button onclick="checkSolution()">Verify Solution</button>
+        <button onclick="getHint()">Get Hint</button>
+        <div id="feedback"></div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='game.js') }}"></script>
+</body>
+</html>
