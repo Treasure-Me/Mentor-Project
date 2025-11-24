@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Multiplier Mayhem</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1>🚀 Matrix Multiplier Mayhem</h1>
+            <p class="subtitle">Master linear algebra through puzzle solving!</p>
+        </div>
+
+        <div class="welcome-content">
+            <div class="welcome-text">
+                <h2>Welcome to the Matrix!</h2>
+                <p>Transform your understanding of matrix multiplication through engaging puzzles and challenges.</p>
+                
+                <div class="features">
+                    <div class="feature">
+                        <h3>🎯 Learn by Doing</h3>
+                        <p>Visualize matrix operations in real-time as you solve puzzles.</p>
+                    </div>
+                    <div class="feature">
+                        <h3>📈 Progressive Difficulty</h3>
+                        <p>Start with 2x2 matrices and work your way up to complex transformations.</p>
+                    </div>
+                    <div class="feature">
+                        <h3>🏆 Master Concepts</h3>
+                        <p>Understand matrix multiplication, inverses, and transformations intuitively.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="welcome-actions">
+                <a href="{{ url_for('level_select') }}" class="btn btn-primary" style="font-size: 1.2em; padding: 15px 30px;">
+                    Start Playing
+                </a>
+                
+                <div class="quick-stats">
+                    <div class="stat">
+                        <span class="stat-number" id="total-levels">8</span>
+                        <span class="stat-label">Challenges</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number" id="completed-levels">0</span>
+                        <span class="stat-label">Completed</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>How to Play</h3>
+            <ol>
+                <li>Select a level from the level selection screen</li>
+                <li>Drag transformation matrices to the operation slots</li>
+                <li>Multiply matrices to transform the input into the target output</li>
+                <li>Use hints if you get stuck</li>
+                <li>Progress through increasingly complex challenges</li>
+            </ol>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='game.js') }}"></script>
+    <script>
+        // Update stats from localStorage
+        document.addEventListener('DOMContentLoaded', function() {
+            const completed = localStorage.getItem('completedLevels') || '0';
+            document.getElementById('completed-levels').textContent = completed;
+        });
+    </script>
+</body>
+</html>
