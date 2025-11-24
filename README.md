@@ -65,3 +65,9 @@ pytest test_integration.py -v --integration
 ```bash
 pytest --cov=matrix_game --cov-report=term-missing
 ```
+
+##Prerequisites
+
+- Python 3.8+
+- Chrome browser (for Selenium tests)
+- ChromeDriver installed and in PATH
