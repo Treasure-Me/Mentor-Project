@@ -2,7 +2,7 @@
 **Core Concept**: Players must arrange and multiply matrices to transform "data streams" into desired outputs. It's like a circuit/pipeline puzzle but with matrix operations.
 
 ## Game Design
-###The "Story"
+### The "Story"
 - They are "Data Flow Engineers" who need to process raw data streams through transformation matrices to achieve target outputs.
 
 ## Game Mechanics
