@@ -30,7 +30,7 @@
 
 ### 1. Install Test Dependencies
 ```bash
-pip install -r requirements-test.txt
+pip install -r requirements.txt
 ```
 ### 2. Run Test Commands
 
