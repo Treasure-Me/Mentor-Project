@@ -30,7 +30,7 @@ Columns of first matrix = Rows of second matrix
 
 ## 🎯 Implementation Guide
 ### Step 1: Understand the Math
-- Watch this Matrix [Multiplication Visualization](https://www.youtube.com/watch?v=XkY2DOUCWMU)
+- Watch this Matrix [Multiplication Visualization](https://www.youtube.com/watch?v=yRwQ7A6jVLk)
 
 - Practice with pen and paper first
 
