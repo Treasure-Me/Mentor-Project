@@ -1,4 +1,4 @@
-// Matrix Multiplier Mayhem - Game Logic
+// Matrix Multiplier Mayhem - Production Game Logic
 class MatrixGame {
     constructor() {
         this.currentLevel = 0;
@@ -9,8 +9,11 @@ class MatrixGame {
 
     init() {
         this.setupEventListeners();
-        this.loadLevel(this.currentLevel);
-        this.generateMatrixPalette();
+        // If we are on the game board, initialize the UI data
+        if (document.getElementById('input-matrix-data')) {
+            this.renderInitialMatrices();
+            this.generateMatrixPalette();
+        }
     }
 
     setupEventListeners() {
@@ -19,56 +22,61 @@ class MatrixGame {
         document.addEventListener('dragover', this.handleDragOver.bind(this));
         document.addEventListener('drop', this.handleDrop.bind(this));
 
-        // Button events
-        document.getElementById('verify-btn').addEventListener('click', this.verifySolution.bind(this));
-        document.getElementById('hint-btn').addEventListener('click', this.getHint.bind(this));
-        document.getElementById('reset-btn').addEventListener('click', this.resetLevel.bind(this));
-        document.getElementById('next-level-btn').addEventListener('click', this.nextLevel.bind(this));
-        
-        // Level selection
-        document.querySelectorAll('.level-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => this.loadLevel(parseInt(e.target.dataset.level)));
-        });
+        // Button events (Using optional chaining in case elements don't exist on all pages)
+        document.getElementById('verify-btn')?.addEventListener('click', this.verifySolution.bind(this));
+        document.getElementById('hint-btn')?.addEventListener('click', this.getHint.bind(this));
+        document.getElementById('reset-btn')?.addEventListener('click', () => location.reload());
+    }
+
+    renderInitialMatrices() {
+        // Parse data embedded in the HTML by Jinja
+        const inputData = JSON.parse(document.getElementById('input-matrix-data').textContent);
+        const targetData = JSON.parse(document.getElementById('target-matrix-data').textContent);
+
+        const inputContainer = document.getElementById('input-matrix-render');
+        const targetContainer = document.getElementById('target-matrix-render');
+
+        inputContainer.appendChild(this.createMatrixVisual(inputData));
+        targetContainer.appendChild(this.createMatrixVisual(targetData));
     }
 
     handleDragStart(e) {
-        if (e.target.classList.contains('draggable-matrix')) {
-            this.selectedMatrix = JSON.parse(e.target.dataset.matrix);
-            e.dataTransfer.setData('text/plain', e.target.id);
+        if (e.target.closest('.draggable-matrix')) {
+            const el = e.target.closest('.draggable-matrix');
+            this.selectedMatrix = JSON.parse(el.dataset.matrix);
+            e.dataTransfer.setData('text/plain', el.id);
+            e.dataTransfer.effectAllowed = 'copy';
         }
     }
 
     handleDragOver(e) {
         e.preventDefault();
-        if (e.target.classList.contains('matrix-slot')) {
-            e.target.classList.add('drag-over');
+        const slot = e.target.closest('.matrix-slot');
+        if (slot) {
+            slot.classList.add('drag-over');
+            e.dataTransfer.dropEffect = 'copy';
         }
     }
 
     handleDrop(e) {
         e.preventDefault();
-        if (e.target.classList.contains('matrix-slot')) {
-            e.target.classList.remove('drag-over');
+        const slot = e.target.closest('.matrix-slot');
+        
+        if (slot) {
+            slot.classList.remove('drag-over');
             
-            const matrixId = e.dataTransfer.getData('text/plain');
-            const matrixElement = document.getElementById(matrixId);
-            
-            if (matrixElement) {
+            if (this.selectedMatrix) {
                 // Clear previous content
-                e.target.innerHTML = '';
+                slot.innerHTML = '';
+                slot.classList.add('filled');
                 
-                // Create visual representation of the matrix
+                // Render the new matrix
                 const matrixVisual = this.createMatrixVisual(this.selectedMatrix);
-                e.target.appendChild(matrixVisual);
+                slot.appendChild(matrixVisual);
                 
-                // Store the placed matrix
-                this.placedMatrices.push({
-                    slot: e.target.id,
-                    matrix: this.selectedMatrix
-                });
-                
-                // Update preview
-                this.updateResultPreview();
+                // Store state (Handling single slot for now, but structured for multiple)
+                this.placedMatrices = [this.selectedMatrix];
+                this.hideFeedback();
             }
         }
     }
@@ -77,18 +85,17 @@ class MatrixGame {
         const container = document.createElement('div');
         container.className = 'matrix-visual';
         
+        // Use CSS Grid dynamically based on columns
+        const cols = matrix[0].length;
+        container.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+        
         matrix.forEach(row => {
-            const rowDiv = document.createElement('div');
-            rowDiv.className = 'matrix-row';
-            
-            row.forEach(cell => {
-                const cellDiv = document.createElement('div');
-                cellDiv.className = 'matrix-cell';
-                cellDiv.textContent = cell;
-                rowDiv.appendChild(cellDiv);
+            row.forEach(val => {
+                const cell = document.createElement('div');
+                cell.className = 'matrix-cell';
+                cell.textContent = val;
+                container.appendChild(cell);
             });
-            
-            container.appendChild(rowDiv);
         });
         
         return container;
@@ -96,21 +103,23 @@ class MatrixGame {
 
     generateMatrixPalette() {
         const palette = document.getElementById('matrix-palette');
+        if (!palette) return;
+        
         palette.innerHTML = '';
 
-        // Generate some sample matrices for the palette
+        // Standard palette. In a full production app, this could come from an API
         const sampleMatrices = [
-            [[1, 0], [0, 1]],  // Identity 2x2
-            [[2, 0], [0, 2]],  // Scale 2x2
-            [[0, 1], [1, 0]],  // Swap 2x2
-            [[1, 2], [3, 4]],  // Sample 2x2
-            [[1, 0, 0], [0, 1, 0], [0, 0, 1]]  // Identity 3x3
+            [[1, 0], [0, 1]],  
+            [[2, 0], [0, 2]],  
+            [[0, 1], [1, 0]],  
+            [[-1, 0], [0, 1]], 
+            [[1, 0, 0], [0, 1, 0], [0, 0, 1]] 
         ];
 
         sampleMatrices.forEach((matrix, index) => {
             const matrixElement = document.createElement('div');
             matrixElement.className = 'draggable-matrix';
-            matrixElement.id = `matrix-${index}`;
+            matrixElement.id = `palette-matrix-${index}`;
             matrixElement.draggable = true;
             matrixElement.dataset.matrix = JSON.stringify(matrix);
             
@@ -119,65 +128,35 @@ class MatrixGame {
         });
     }
 
-    async loadLevel(levelId) {
-        try {
-            const response = await fetch(`/level/${levelId}`);
-            if (response.ok) {
-                this.currentLevel = levelId;
-                document.getElementById('level-number').textContent = levelId + 1;
-                
-                // Reset game state
-                this.placedMatrices = [];
-                document.querySelectorAll('.matrix-slot').forEach(slot => {
-                    slot.innerHTML = 'Drag Matrix Here';
-                });
-                
-                this.updateResultPreview();
-                this.hideFeedback();
-            }
-        } catch (error) {
-            console.error('Error loading level:', error);
-        }
-    }
-
-    updateResultPreview() {
-        // TODO: Calculate and display the current result based on placed matrices
-        // This would involve multiplying the input matrix with placed matrices
-        const preview = document.getElementById('result-preview');
-        
-        if (this.placedMatrices.length > 0) {
-            preview.textContent = 'Matrices placed! Click Verify to check solution.';
-            preview.className = 'preview-active';
-        } else {
-            preview.textContent = 'Drag matrices to transformation slots';
-            preview.className = 'preview-inactive';
-        }
-    }
-
     async verifySolution() {
+        if (this.placedMatrices.length === 0) {
+            this.showFeedback('warning', 'Please drag a matrix into the transformation slot first!');
+            return;
+        }
+
+        const originalBtnText = document.getElementById('verify-btn').textContent;
+        document.getElementById('verify-btn').textContent = 'Verifying...';
+
         try {
-            const matrices = this.placedMatrices.map(pm => pm.matrix);
-            
             const response = await fetch('/check_solution', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    matrices: matrices,
-                    level: this.currentLevel
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ matrices: this.placedMatrices })
             });
             
             const result = await response.json();
-            this.showFeedback(result.correct, result.message);
             
             if (result.correct) {
-                document.getElementById('next-level-btn').style.display = 'block';
+                this.showFeedback('correct', 'Matrix Matched! Excellent work.');
+                document.getElementById('next-level-btn').style.display = 'inline-flex';
+            } else {
+                this.showFeedback('false', result.message || 'Incorrect transformation. Try again!');
             }
         } catch (error) {
-            console.error('Error verifying solution:', error);
-            this.showFeedback(false, 'Error verifying solution. Please try again.');
+            console.error('API Error:', error);
+            this.showFeedback('false', 'Server error checking solution.');
+        } finally {
+            document.getElementById('verify-btn').textContent = originalBtnText;
         }
     }
 
@@ -187,83 +166,25 @@ class MatrixGame {
             const data = await response.json();
             this.showFeedback('hint', data.hint);
         } catch (error) {
-            console.error('Error getting hint:', error);
+            this.showFeedback('hint', 'Think about how row and column dimensions align.');
         }
     }
 
     showFeedback(type, message) {
         const feedback = document.getElementById('feedback');
         feedback.textContent = message;
-        feedback.className = `feedback feedback-${type}`;
+        // Reset classes
+        feedback.className = 'feedback';
+        feedback.classList.add(`feedback-${type}`);
         feedback.style.display = 'block';
-        
-        // Auto-hide after 5 seconds
-        setTimeout(() => {
-            this.hideFeedback();
-        }, 5000);
     }
 
     hideFeedback() {
-        document.getElementById('feedback').style.display = 'none';
-    }
-
-    resetLevel() {
-        this.loadLevel(this.currentLevel);
-    }
-
-    nextLevel() {
-        this.loadLevel(this.currentLevel + 1);
-    }
-
-    // Matrix multiplication utility (client-side for preview)
-    multiplyMatrices(a, b) {
-        if (!a || !b || a[0].length !== b.length) {
-            return null;
-        }
-        
-        const result = [];
-        for (let i = 0; i < a.length; i++) {
-            result[i] = [];
-            for (let j = 0; j < b[0].length; j++) {
-                let sum = 0;
-                for (let k = 0; k < a[0].length; k++) {
-                    sum += a[i][k] * b[k][j];
-                }
-                result[i][j] = sum;
-            }
-        }
-        return result;
+        const feedback = document.getElementById('feedback');
+        if (feedback) feedback.style.display = 'none';
     }
 }
 
-// Initialize game when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.matrixGame = new MatrixGame();
 });
-
-// Utility functions for matrix operations
-const MatrixUtils = {
-    // Format matrix for display
-    formatMatrix(matrix) {
-        return matrix.map(row => `[${row.join(', ')}]`).join('\n');
-    },
-    
-    // Validate matrix dimensions for multiplication
-    canMultiply(a, b) {
-        return a && b && a[0].length === b.length;
-    },
-    
-    // Generate random matrix
-    generateRandomMatrix(rows, cols, min = -5, max = 5) {
-        return Array.from({ length: rows }, () =>
-            Array.from({ length: cols }, () => 
-                Math.floor(Math.random() * (max - min + 1)) + min
-            )
-        );
-    }
-};
-
-// Export for testing
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { MatrixGame, MatrixUtils };
-}

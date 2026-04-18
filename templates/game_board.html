@@ -1,52 +1,62 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Matrix Multiplier Mayhem</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level Play - Matrix Mayhem</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="game-container">
-        <h1>Level <span id="level-number">1</span></h1>
+        <div class="game-header" style="margin-bottom: 20px;">
+            <h1>{{ level.name | default('Active Sequence') }}</h1>
+            <a href="{{ url_for('level_select') }}" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">← Sequences</a>
+        </div>
         
+        <script type="application/json" id="input-matrix-data">{{ level.input | tojson }}</script>
+        <script type="application/json" id="target-matrix-data">{{ level.target | tojson }}</script>
+
         <div class="matrices-container">
-            <!-- Input Matrix -->
             <div class="matrix-panel">
-                <h3>Input Stream</h3>
-                <div id="input-matrix" class="matrix">
-                    {{ level.input|tojson }}
-                </div>
+                <h3>Input State</h3>
+                <div id="input-matrix-render"></div>
             </div>
             
-            <!-- Transformation Slot (DRAGGABLE) -->
             <div class="operation-panel">
-                <h3>Transformation</h3>
-                <div id="transformation-slot" class="matrix-slot" 
-                     ondrop="dropMatrix(event)" ondragover="allowDrop(event)">
-                    Drag Matrix Here
-                </div>
                 <div class="operator">×</div>
+                <div class="matrix-panel">
+                    <h3>Transformation</h3>
+                    <div id="transformation-slot" class="matrix-slot">
+                        Drop Matrix Here
+                    </div>
+                </div>
+                <div class="operator">=</div>
             </div>
             
-            <!-- Target Matrix -->
             <div class="matrix-panel">
                 <h3>Target Output</h3>
-                <div id="target-matrix" class="matrix">
-                    {{ level.target|tojson }}
-                </div>
+                <div id="target-matrix-render"></div>
             </div>
         </div>
         
-        <!-- Matrix Palette -->
         <div class="palette">
-            <h3>Available Matrices</h3>
+            <h3>Component Palette</h3>
             <div id="matrix-palette">
-                <!-- THEY COMPLETE: Generate draggable matrix options -->
-            </div>
+                </div>
         </div>
         
-        <button onclick="checkSolution()">Verify Solution</button>
-        <button onclick="getHint()">Get Hint</button>
-        <div id="feedback"></div>
+        <div class="controls">
+            <button id="verify-btn" class="btn btn-primary">Execute Check</button>
+            <button id="hint-btn" class="btn btn-secondary">Request Hint</button>
+            <button id="reset-btn" class="btn btn-secondary">Reset Board</button>
+            
+            <a href="#" id="next-level-btn" class="btn btn-primary" style="display: none; background: var(--success);">
+                Next Sector →
+            </a>
+        </div>
+
+        <div id="feedback" class="feedback"></div>
     </div>
     
     <script src="{{ url_for('static', filename='game.js') }}"></script>

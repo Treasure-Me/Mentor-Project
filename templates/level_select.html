@@ -3,90 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Select Level - Matrix Multiplier Mayhem</title>
+    <title>Select Level - Matrix Mayhem</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="game-container">
         <div class="game-header">
-            <h1>Select Level</h1>
+            <h1>Select Sequence</h1>
             <p class="subtitle">Choose your matrix challenge</p>
-            <a href="{{ url_for('index') }}" class="btn btn-primary" style="margin-top: 10px;">← Back to Home</a>
+            <div style="margin-top: 20px;">
+                <a href="{{ url_for('index') }}" class="btn btn-secondary btn-sm">← Abort to Main</a>
+            </div>
         </div>
 
         <div class="levels-section">
             <div class="difficulty-section">
-                <h2>🔰 Beginner Levels</h2>
-                <p>Master the basics of 2x2 matrix multiplication</p>
+                <h2 style="color: var(--accent-cyan);">🔰 Standard Transformations</h2>
+                <p style="color: var(--text-secondary);">Master the basics of 2x2 matrix multiplication.</p>
                 <div class="level-selection">
                     {% for level in range(1, 4) %}
-                    <div class="level-btn {% if level == 1 %}current{% endif %}" 
-                         data-level="{{ level - 1 }}"
-                         onclick="window.location.href='/level/{{ level - 1 }}'">
-                        Level {{ level }}
+                    <div class="level-btn" onclick="window.location.href='/level/{{ level - 1 }}'">
+                        Sector {{ level }}
                     </div>
                     {% endfor %}
                 </div>
             </div>
 
             <div class="difficulty-section">
-                <h2>⭐ Intermediate Levels</h2>
-                <p>Challenge yourself with 3x3 matrices and multiple transformations</p>
+                <h2 style="color: var(--accent-purple);">⭐ Complex Operations</h2>
+                <p style="color: var(--text-secondary);">Challenge yourself with 3x3 matrices and reflections.</p>
                 <div class="level-selection">
                     {% for level in range(4, 7) %}
-                    <div class="level-btn {% if level == 4 %}current{% endif %}" 
-                         data-level="{{ level - 1 }}"
-                         onclick="window.location.href='/level/{{ level - 1 }}'">
-                        Level {{ level }}
+                    <div class="level-btn" onclick="window.location.href='/level/{{ level - 1 }}'">
+                        Sector {{ level }}
                     </div>
                     {% endfor %}
                 </div>
             </div>
-
-            <div class="difficulty-section">
-                <h2>🚀 Advanced Levels</h2>
-                <p>Solve complex problems with matrix inverses and larger dimensions</p>
-                <div class="level-selection">
-                    {% for level in range(7, 9) %}
-                    <div class="level-btn {% if level == 7 %}current{% endif %}" 
-                         data-level="{{ level - 1 }}"
-                         onclick="window.location.href='/level/{{ level - 1 }}'">
-                        Level {{ level }}
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-
-        <div class="progress-section">
-            <h3>Your Progress</h3>
-            <div class="progress-bar">
-                <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
-            </div>
-            <p id="progress-text">0% Complete</p>
         </div>
     </div>
-
-    <script src="{{ url_for('static', filename='game.js') }}"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Load progress from localStorage
-            const completed = parseInt(localStorage.getItem('completedLevels') || '0');
-            const totalLevels = 8;
-            const progress = (completed / totalLevels) * 100;
-            
-            document.getElementById('progress-fill').style.width = progress + '%';
-            document.getElementById('progress-text').textContent = Math.round(progress) + '% Complete';
-            
-            // Update level buttons based on completion
-            document.querySelectorAll('.level-btn').forEach(btn => {
-                const level = parseInt(btn.dataset.level);
-                if (level < completed) {
-                    btn.classList.add('completed');
-                    btn.classList.remove('current');
-                }
-            });
-        });
-    </script>
 </body>
 </html>

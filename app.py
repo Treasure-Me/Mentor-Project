@@ -21,33 +21,62 @@ def load_level(level_id):
     if level_id < len(game.levels):
         session['current_level'] = level_id
         level_data = game.levels[level_id]
-        # THEY COMPLETE: Prepare level data for the template
         return render_template('game_board.html', level=level_data)
-    return "Level not found!"
+    return "Level not found!", 404
 
 @app.route('/check_solution', methods=['POST'])
 def check_solution():
     """
-    CHALLENGE 4: Validate player's matrix multiplication
+    Validate player's matrix multiplication
     Expected JSON: {'matrices': [A, B, C, ...]} 
     """
     data = request.json
-    matrices = data.get('matrices', [])
+    user_matrices = data.get('matrices', [])
+    
+    if not user_matrices:
+        return jsonify({'correct': False, 'message': 'No matrices provided.'})
+        
     current_level = session.get('current_level', 0)
-    target = game.levels[current_level]['target']
     
-    # TODO: Implement solution checking logic
-    # Multiply all matrices in order and compare with target
+    # Safety check to ensure level exists
+    if current_level >= len(game.levels):
+        return jsonify({'correct': False, 'message': 'Invalid level.'})
+        
+    level_data = game.levels[current_level]
+    input_matrix = level_data['input']
+    target_matrix = level_data['target']
     
-    return jsonify({'correct': False, 'message': 'Implement this!'})
+    # Start with the original input matrix
+    current_result = input_matrix
+    
+    # Multiply all matrices in order
+    for matrix in user_matrices:
+        current_result = game.multiply_matrices(current_result, matrix)
+        
+        # multiply_matrices returns None if dimensions are incompatible
+        if current_result is None:
+            return jsonify({
+                'correct': False, 
+                'message': 'Dimension mismatch! Check your rows and columns.'
+            })
+    
+    # Compare final result with target using the tolerance check method
+    if game.is_matrix_equal(current_result, target_matrix):
+        return jsonify({'correct': True, 'message': 'Matrix Matched! Excellent work.'})
+    else:
+        return jsonify({'correct': False, 'message': 'Transformation incorrect. Try again!'})
 
 @app.route('/hint')
 def get_hint():
-    """Provide algorithmic hints"""
-    level = session.get('current_level', 0)
-    # TODO: Generate helpful hints based on level difficulty
-    return jsonify({'hint': 'Think about matrix dimensions first!'})
+    """Provide algorithmic hints based on the current level"""
+    current_level = session.get('current_level', 0)
+    
+    if current_level < len(game.levels):
+        # Fetch the specific hint defined in the _init_levels dictionary
+        level_hint = game.levels[current_level].get('hint', 'Think about matrix dimensions first!')
+        return jsonify({'hint': level_hint})
+        
+    return jsonify({'hint': 'No hint available for this level.'})
 
 if __name__ == '__main__':
-    # app.run() = app.start()
     app.run(debug=True, host='0.0.0.0', port=5000)
